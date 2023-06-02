@@ -152,8 +152,28 @@ function createEmployeeTriggers()
 */
 function createSupervisorTriggers()
 {
+  var protection, sheetName;
+
   SpreadsheetApp.getActive().getSheets()
-    .map(sheet => (sheet.getSheetName() !== 'Timesheet') ? sheet.protect() : sheet.getRangeList(['H1:H1', 'H10:H10', 'D27:D27', 'G27:G27', 'J1:J']).getRanges().map(range => range.protect()))
+    .map(sheet => {
+      sheetName = sheet.getSheetName()
+
+      if (sheetName !== 'Timesheet') // Protect every sheet that is not the timesheet
+      {
+        protection = (sheetName === 'Supervisor' || sheetName === 'Timesheet_EmailCopy') ? // Also hide the Supervisor and Timesheet_EmailCopy sheet
+          sheet.hideSheet().protect().addEditor(Session.getEffectiveUser()) : sheet.protect().addEditor(Session.getEffectiveUser())
+          
+        protection.removeEditors(protection.getEditors());
+      }
+      else // Leave the Timesheet unprotected except for 6 ranges
+      {
+        sheet.getRangeList(['H1:H1', 'H10:H10', 'D27:D27', 'G27:G27', 'J1:J']).getRanges()
+          .map(range => {
+            protection = range.protect().addEditor(Session.getEffectiveUser());
+            protection.removeEditors(protection.getEditors())
+          })
+      }
+    })
 
   ScriptApp.newTrigger("setHolidaysAndPayPeriodsAnnually").timeBased().onMonthDay(1).atHour(2).create();
 }
@@ -190,13 +210,17 @@ function deleteReminderEmailTrigger()
 }
 
 /**
- * Deletes all of the triggers
+ * Deletes all of the triggers and removes all of the protections.
  *
  * @author Jarren Ralf
  */
-function deleteAllTriggers()
+function deleteAllTriggersAndRemoveAllProtections()
 {
   ScriptApp.getProjectTriggers().map(trigger => ScriptApp.deleteTrigger(trigger))
+
+  [SpreadsheetApp.ProtectionType.RANGE, SpreadsheetApp.ProtectionType.SHEET].map(protectionType => 
+    SpreadsheetApp.getActive().getProtections(protectionType).map(protection => (protection.canEdit()) ? protection.remove() : '')
+  )
 }
 
 /**
