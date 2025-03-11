@@ -3,4 +3,4 @@ Link to Sample Spreadsheet: [PNT Timesheet](https://docs.google.com/spreadsheets
 
 How does this spreadsheet benefit Pacific Net & Twine?
 - This spreadsheets automates the process of preparing an employee's timesheet for submission to the payroll manager.
-- This version requires the employee to have their suoervisor approve the hours before they get sent to the payroll manager.
+- This version requires the employee to have their supervisor approve the hours before they get sent to the payroll manager.
